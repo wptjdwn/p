@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환율 지도</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        .info-box {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        .info-box h4 {
+            margin: 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>환율 지도</h1>
+    <div id="map"></div>
+    <div id="exchange-rates">
+        <h3>환율 정보</h3>
+        <div><strong>USD:</strong> <span id="usd-rate"></span></div>
+        <div><strong>EUR:</strong> <span id="eur-rate"></span></div>
+        <div><strong>KRW:</strong> <span id="krw-rate"></span></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // 환율 데이터 (FastAPI 백엔드에서 제공하는 값)
+        const rates = {{ rates | tojson }};
+        
+        // 지도 초기화
+        const map = L.map('map').setView([37.5665, 126.9784], 13);  // 서울의 위도, 경도
+
+        // OpenStreetMap 타일 레이어 추가
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // 마커 추가: 서울 위치에 USD, EUR, KRW 환율 정보 표시
+        const usdMarker = L.marker([37.5665, 126.9784]).addTo(map);
+        usdMarker.bindPopup(`
+            <div class="info-box">
+                <h4>USD 환율</h4>
+                <p>${rates.USD} 원</p>
+            </div>
+        `);
+
+        const eurMarker = L.marker([37.5651, 126.9895]).addTo(map);
+        eurMarker.bindPopup(`
+            <div class="info-box">
+                <h4>EUR 환율</h4>
+                <p>${rates.EUR} 원</p>
+            </div>
+        `);
+
+        const krwMarker = L.marker([37.5700, 126.9800]).addTo(map);
+        krwMarker.bindPopup(`
+            <div class="info-box">
+                <h4>KRW 환율</h4>
+                <p>${rates.KRW} 원</p>
+            </div>
+        `);
+
+        // 환율 정보를 페이지에 표시
+        document.getElementById("usd-rate").textContent = rates.USD + " 원";
+        document.getElementById("eur-rate").textContent = rates.EUR + " 원";
+        document.getElementById("krw-rate").textContent = rates.KRW + " 원";
+    </script>
+</body>
+</html>
+
